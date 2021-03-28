@@ -67,7 +67,7 @@ def load_config():
             config = json.load(json_file)
             log(">>> Loaded configuration START >>>")
             for _ in config:
-                log("{0: <20}: {1}".format(_, config[_]))
+                log("{0: <30}: {1}".format(_, config[_]))
             log("<<< Loaded configuration END <<<")
     except IOError as e:
         print(e)
