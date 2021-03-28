@@ -8,5 +8,6 @@
   "random_wait_sigma": 1000,
   "headless_chrome": true,
   "proxy_address": "blah-blah-blah",
-  "proxy_port": 8080
+  "proxy_port": 8080,
+  "debug": false
 }

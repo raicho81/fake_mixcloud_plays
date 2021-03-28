@@ -9,8 +9,10 @@ import os
 import sys
 import threading
 from datetime import datetime
+import inspect
 
 
+DEBUG = False
 # These 2 variables are used to create interruptable timed-waits instead of time.sleep
 # which is not interruptable so we can stop grace-fully when an appropriate OS signal is received.
 stop = False
@@ -31,8 +33,17 @@ else:
 # Add time and flush print output
 def log(*args):
     t = datetime.now().time()
-    current_time = "[{0:02}:{1:02}:{2:02}:{3:06}] ".format(t.hour, t.minute, t.second, t.microsecond)
-    print(current_time, *args, flush=True)
+    if DEBUG:
+        callerframerecord = inspect.stack()[1]  # 0 represents this line
+        # 1 represents line at caller
+        frame = callerframerecord[0]
+        info = inspect.getframeinfo(frame)
+        current_time_etc = "[{0:02}:{1:02}:{2:02}:{3:06}, {4}:{5:<25}:{6:<5}] ".format(t.hour, t.minute, t.second, t.microsecond,
+                                                                                       info.filename, info.function, info.lineno)
+    else:
+        current_time_etc = "[{0:02}:{1:02}:{2:02}:{3:06}]".format(t.hour, t.minute, t.second, t.microsecond)
+
+    print(current_time_etc, *args, flush=True)
 
 
 def notify_wait_cond(cond):
@@ -61,10 +72,15 @@ def install_signal_handlers():
 
 
 def load_config():
+    global DEBUG
     config = None
     try:
         with open('config.json') as json_file:
             config = json.load(json_file)
+            if not ('debug' in config.keys()) or not isinstance(config['debug'], bool):
+                log("Error: 'debug' attribute missing in config file or is with invalid value! Defaulting to config['debug']==False")
+            else:
+                DEBUG = config['debug']
             log(">>> Loaded configuration START >>>")
             for _ in config:
                 log("{0: <30}: {1}".format(_, config[_]))
@@ -85,7 +101,7 @@ def check_config(config):
         log("Invalid configuration: 'speed' must be 'fast' or 'random'")
         log("Defaulting to speed=fast")
         config['speed'] = 'fast'
-    # Other unimplemented checks
+    # Other unimplemented checks etc.
 
 
 def make_chrome_options(config):
@@ -124,27 +140,27 @@ def start_play_if_stopped(browser, config):
 
 
 # Start an interruptable timed-wait instead of time.sleep, which is not interruptable.
-# This is very probably to be less accurate than time.sleep ;)
-# To interrupt a timed-wait we need to simply call notify_wait_cond before the threading.Timer has expired
+# To interrupt a timed-wait we need to simply call notify_wait_cond before the duration has expired
 # I did this to implement graceful stops when an appropriate signal is received from the OS.
 def wait_for(duration, cond):
     if stop:
         return
-    timer = threading.Timer(duration, lambda: notify_wait_cond(wait_cond))
-    timer.start()
+    if duration <= 0:
+        return
+    log("Will stay Idle for {} second(s)".format(duration))
     with cond:
-        cond.wait()
+        cond.wait(duration)
 
 
 def main():
     log("[    *** *** *** Starting *** *** ***    ]")
-    install_signal_handlers()
-
     refresh_count = itertools.count(1)
 
     # Load config and then check it for errors
     config = load_config()
     check_config(config)
+
+    install_signal_handlers()
 
     # Make Chrome options
     chrome_options = make_chrome_options(config)
