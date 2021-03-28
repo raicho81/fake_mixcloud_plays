@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:buster-slim AS base
 
 USER root
 # Non-Interactive packages install/upgrade
