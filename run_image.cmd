@@ -1,5 +1,4 @@
-docker ps -aq --filter name=mixcloud_fake_plays > res_img_id
-set /p Res_Img_Id=<res_img_id
-del res_img_id
-docker rm -f %Res_Img_Id%
+docker ps -aq --filter name=mixcloud_fake_plays > res_img_ids
+for /f "Tokens=* Delims=" %%x in (res_img_ids) do docker rm -f %%x
+del res_img_ids
 docker run --name mixcloud_fake_plays -d mixcloud_fake_plays
