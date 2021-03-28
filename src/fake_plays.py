@@ -12,13 +12,14 @@ from datetime import datetime
 import inspect
 
 
+# More verbose log
 DEBUG = False
+
 # These 2 variables are used to create interruptable timed-waits instead of time.sleep
 # which is not interruptable so we can stop grace-fully when an appropriate OS signal is received.
 stop = False
 wait_cond = threading.Condition()
-###
-
+# # #
 
 if os.name == "posix":
     handled_signals = {
@@ -30,7 +31,7 @@ else:
     handled_signals = None  # Only signals on POSIX systems are handled for now
 
 
-# Add time and flush print output
+# Add time and etc. and then flush the print output
 def log(*args):
     t = datetime.now().time()
     if DEBUG:
@@ -78,7 +79,8 @@ def load_config():
         with open('config.json') as json_file:
             config = json.load(json_file)
             if not ('debug' in config.keys()) or not isinstance(config['debug'], bool):
-                log("Error: 'debug' attribute missing in config file or is with invalid value! Defaulting to config['debug']==False")
+                log("Error: 'debug' attribute missing in config file or is with invalid value! Defaulting to config["
+                    "'debug']==False")
             else:
                 DEBUG = config['debug']
             log(">>> Loaded configuration START >>>")
@@ -97,11 +99,11 @@ def check_config(config):
     if config['mix_url'] == "":
         log("mix_url can't be empty! Aborting.")
         sys.exit(1)
-    if config['speed'] != "fast" and config['speed'] != "random":
-        log("Invalid configuration: 'speed' must be 'fast' or 'random'")
-        log("Defaulting to speed=fast")
+    if not ('speed' in config.keys()) or config['speed'] != "fast" and config['speed'] != "random":
+        log("Error: invalid or missing 'speed' parameter in config must be 'fast' or 'random'")
+        log("Defaulting to config['speed']=='fast'")
         config['speed'] = 'fast'
-    # Other unimplemented checks etc.
+    # Other unimplemented checks etc. Well, I was too lazy to make them all :D
 
 
 def make_chrome_options(config):
@@ -204,7 +206,7 @@ def main():
     try:
         log("Trying to close Chrome")
         browser.close()
-        log("Closed Chrome")
+        log("Closed Chrome. Whew :) It wasn't so hard, was it?")
     except WebDriverException as e:
         log(e)
 
