@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
-import time
 import random
 import math
 import json
@@ -8,39 +7,57 @@ import itertools
 import signal
 import os
 import sys
+import threading
+from datetime import datetime
 
 
+# These 2 are used to create interruptable timed-waits instead of time.sleep
+# which is not interruptable so we can stop grace-fully when an appropriate OS signal is received.
 stop = False
+wait_cond = threading.Condition()
+###
+
+
 if os.name == "posix":
     handled_signals = {
                         signal.SIGTERM: "SIGTERM",
                         signal.SIGHUP:  "SIGHUP",
-                        signal.SIGKILL: "SIGKILL"
+                        signal.SIGABRT: "SIGABRT"
                        }
 else:
-    handled_signals = None
+    handled_signals = None  # Only signals on POSIX systems are handled for now
 
 
-# Flush print output ;)
-def print_flush(*args):
-    print(*args, flush=True)
+# Add time and flush print output
+def log(*args):
+    t = datetime.now().time()
+    current_time = "[{0:02}:{1:02}:{2:02}:{3:06}] ".format(t.hour, t.minute, t.second, t.microsecond)
+    print(current_time, *args, flush=True)
+
+
+def notify_wait_cond(cond):
+    with cond:
+        cond.notifyAll()
 
 
 def signal_handler(signum, frame):
-    print_flush('Signal handler called with signal {}'.format(handled_signals[signum]))
+    log('{} signal received. Will try to stop grace-fully'.format(handled_signals[signum]))
     global stop
     stop = True
+    notify_wait_cond(wait_cond)
 
 
 def install_signal_handlers():
     # Install signal handler(s) to leverage grace-full stop if OS is POSIX
     if os.name == "posix":
-        print_flush(">>> Installing signal handlers START >>>")
+        log(">>> Installing signal handlers START >>>")
         for signal_code in handled_signals.keys():
-            print_flush("Installing signal handler for signal {}".format(handled_signals[signal_code]))
-            signal.signal(signal_code, signal_handler)
-            print_flush("Installed signal handler for signal {}".format(handled_signals[signal_code]))
-        print_flush("<<< Installing signal handlers END <<<")
+            try:
+                signal.signal(signal_code, signal_handler)
+                log("Installed signal handler for signal {}".format(handled_signals[signal_code]))
+            except OSError as e:
+                log(e)
+        log("<<< Installing signal handlers END <<<")
 
 
 def load_config():
@@ -48,10 +65,10 @@ def load_config():
     try:
         with open('config.json') as json_file:
             config = json.load(json_file)
-            print_flush(">>> Loaded configuration START >>>")
+            log(">>> Loaded configuration START >>>")
             for _ in config:
-                print_flush("{0: <20}: {1}".format(_, config[_]))
-            print_flush("<<< Loaded configuration END <<<")
+                log("{0: <20}: {1}".format(_, config[_]))
+            log("<<< Loaded configuration END <<<")
     except IOError as e:
         print(e)
     return config
@@ -59,14 +76,14 @@ def load_config():
 
 def check_config(config):
     if config is None:
-        print_flush("Config not loaded! Aborting.")
+        log("Config not loaded! Aborting.")
         sys.exit(1)
     if config['mix_url'] == "":
-        print_flush("mix_url can't be empty! Aborting.")
+        log("mix_url can't be empty! Aborting.")
         sys.exit(1)
     if config['speed'] != "fast" and config['speed'] != "random":
-        print_flush("Invalid configuration: 'speed' must be 'fast' or 'random'")
-        print_flush("Defaulting to speed=fast")
+        log("Invalid configuration: 'speed' must be 'fast' or 'random'")
+        log("Defaulting to speed=fast")
         config['speed'] = 'fast'
     # Other unimplemented checks
 
@@ -76,29 +93,47 @@ def make_chrome_options(config):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.headless = config['headless_chrome']
     chrome_options.add_argument("--mute-audio")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-
+    if os.name == "posix":
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
     if config['proxy_address'] != "" and config['proxy_port'] != 0:
         chrome_options.add_argument("--proxy-server={}:{}".format(config['proxy_address'], config['proxy_port']))
 
-    print_flush(">>> Chrome arguments START >>>")
-
+    log(">>> Chrome arguments START >>>")
     for a in chrome_options.arguments:
-        print("{}".format(a))
-    print_flush("<<< Chrome arguments END <<<")
+        log("{}".format(a))
+    log("<<< Chrome arguments END <<<")
 
     return chrome_options
 
 
 def start_play_if_stopped(browser, config):
-    print_flush("Trying to start playback if not started")
+    if stop:
+        return
+    log("Trying to start playback if not started")
     try:
         play_btn = browser.find_element_by_xpath(config['play_button_xpath'])
         play_btn.click()    # start playback if not started
-        print_flush("Playback started")
+        log("Playback started")
     except WebDriverException as e:
-        print_flush(e)
+        msg = str(e)
+        if msg.find("no such element:"):
+            log("Playback is already started")
+        else:
+            log(msg)
+
+
+# Start an interruptable timed-wait instead of time.sleep, which is not interruptable.
+# This is very probably to be less accurate than time.sleep ;)
+# To interrupt a timed-wait we need to simply call notify_wait_cond before the threading.Timer has expired
+# I did this to implement graceful stops when an appropriate signal is received from the OS.
+def wait_for(duration, cond):
+    if stop:
+        return
+    timer = threading.Timer(duration, lambda: notify_wait_cond(wait_cond))
+    timer.start()
+    with cond:
+        cond.wait()
 
 
 def main():
@@ -115,45 +150,45 @@ def main():
 
     # Start Chrome etc.
     try:
-        print_flush("Trying to start Chrome")
+        log("Trying to start Chrome")
         browser = webdriver.Chrome(options=chrome_options)
-        print_flush("Chrome started")
-        print_flush("Trying to open URL: {}".format(config['mix_url']))
+        log("Chrome started")
+        log("Trying to open URL: {}".format(config['mix_url']))
         browser.get(config['mix_url'])
-        print_flush("Loaded: {}".format(config['mix_url']))
-        time.sleep(config['wait_time_before_try_play'])
+        log("Loaded: {}".format(config['mix_url']))
+        wait_for(config['wait_time_before_try_play'], wait_cond)
         start_play_if_stopped(browser, config)
     except WebDriverException as e:
-        print_flush(e)
+        log(e)
 
-    # Start reloading the page after random time (speed=slow) or fixed time (speed=fast)
+    # Reload the page after random time (config['speed']=='slow') or fixed time (config['speed']=='fast')
     while not stop:
         if config['speed'] == 'random':
-            time.sleep(abs(math.ceil(random.gauss(config['random_wait_mu'], config['random_wait_sigma']))))
+            wait_for(abs(math.ceil(random.gauss(config['random_wait_mu'], config['random_wait_sigma']))), wait_cond)
         if config['speed'] == 'fast':
-            time.sleep(config['fast_wait_time'])
+            wait_for(config['fast_wait_time'], wait_cond)
 
         try:
             browser.refresh()
-            print_flush("Refreshed page (count={})".format(refresh_count.__next__()))
+            log("Refreshed page (count={})".format(refresh_count.__next__()))
             browser.switch_to.alert.accept()
-            print_flush("Closed Alert")
+            log("Closed Alert")
         except WebDriverException as e:
-            s = str(e)
-            if not s.find("no such alert"):
-                print_flush(s)
+            msg = str(e)
+            if not msg.find("no such alert"):
+                log(msg)
 
-        time.sleep(config['wait_time_before_try_play'])
+        wait_for(config['wait_time_before_try_play'], wait_cond)
         start_play_if_stopped(browser, config)
 
     try:
-        print_flush("Trying to close Chrome")
+        log("Trying to close Chrome")
         browser.close()
-        print_flush("Closed Chrome")
+        log("Closed Chrome")
     except WebDriverException as e:
-        print_flush(e)
+        log(e)
 
-    print_flush("Stopped")
+    log("Stopped")
 
 
 if __name__ == "__main__":

@@ -11,8 +11,9 @@ services:
     restart: always
     volumes: ./proxy_configs/config_proxy_2.json:/app/config.json ro
 
-# You get the idea. To run the image N times with different proxies just create (generate) the ./proxy_configs/config_proxy_[number].json
-# files filled with the correct proxy parameters and then -> run 'docker-compose up'.
+# You get the idea. To run the image N times with different proxies (and possibly with different mix_url's)
+# just create (generate) the ./proxy_configs/config_proxy_[number].json files filled with the correct proxy parameters
+# and then -> run 'docker-compose up'.
 # I guess this file can also be generated programmatically for more convenience.
 # [number] can also be replaced with something more meaningful.
 # What we need is a *decent proxy list* with *checked and working* proxy servers.

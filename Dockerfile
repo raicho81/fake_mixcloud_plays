@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM debian:buster-slim
 
 USER root
 # Non-Interactive packages install/upgrade
@@ -12,7 +12,7 @@ COPY requirements.txt .
 
 #  Install pre-requisites
 RUN apt-get update && apt-get upgrade -y && apt-get clean
-RUN apt-get install -y curl python3.8 python3.8-dev python3.8-distutils gnupg wget unzip
+RUN apt-get install -y curl python3 python3-dev python3-distutils gnupg wget unzip
 RUN curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python3 get-pip.py --force-reinstall && \
     rm get-pip.py
@@ -33,8 +33,6 @@ RUN unzip chromedriver_linux64.zip && rm chromedriver_linux64.zip
 RUN mv chromedriver /usr/bin/chromedriver
 RUN chown root:root /usr/bin/chromedriver
 RUN chmod +x /usr/bin/chromedriver
-
-EXPOSE 9222
 
 # command to run on container start
 CMD ["python3", "fake_plays.py"]
