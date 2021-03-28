@@ -16,4 +16,3 @@ services:
 # and then -> run 'docker-compose up'.
 # I guess this file can also be generated programmatically for more convenience.
 # [number] can also be replaced with something more meaningful.
-# What we need is a *decent proxy list* with *checked and working* proxy servers.

@@ -12,7 +12,9 @@ COPY requirements.txt .
 
 #  Install pre-requisites
 RUN apt-get update && apt-get upgrade -y && apt-get clean
-RUN apt-get install -y curl python3 python3-dev python3-distutils gnupg wget unzip
+RUN apt-get install -y curl python3 python3-dev python3-distutils gnupg wget unzip procps
+
+# Install pip
 RUN curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python3 get-pip.py --force-reinstall && \
     rm get-pip.py
@@ -34,5 +36,5 @@ RUN mv chromedriver /usr/bin/chromedriver
 RUN chown root:root /usr/bin/chromedriver
 RUN chmod +x /usr/bin/chromedriver
 
-# command to run on container start
+# Command to run on container start
 CMD ["python3", "fake_plays.py"]

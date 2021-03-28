@@ -11,7 +11,7 @@ import threading
 from datetime import datetime
 
 
-# These 2 are used to create interruptable timed-waits instead of time.sleep
+# These 2 variables are used to create interruptable timed-waits instead of time.sleep
 # which is not interruptable so we can stop grace-fully when an appropriate OS signal is received.
 stop = False
 wait_cond = threading.Condition()
@@ -137,6 +137,7 @@ def wait_for(duration, cond):
 
 
 def main():
+    log("[    *** *** *** Starting *** *** ***    ]")
     install_signal_handlers()
 
     refresh_count = itertools.count(1)
@@ -168,6 +169,9 @@ def main():
         if config['speed'] == 'fast':
             wait_for(config['fast_wait_time'], wait_cond)
 
+        if stop:
+            break
+
         try:
             browser.refresh()
             log("Refreshed page (count={})".format(refresh_count.__next__()))
@@ -188,7 +192,7 @@ def main():
     except WebDriverException as e:
         log(e)
 
-    log("Stopped")
+    log("[    *** *** *** Stopped *** *** ***    ]")
 
 
 if __name__ == "__main__":
