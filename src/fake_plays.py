@@ -38,8 +38,10 @@ def log(*args):
         caller_frame_record = inspect.stack()[1]    # 0 represents this line, 1 represents line at caller
         frame = caller_frame_record[0]              # get the caller stack frame
         info = inspect.getframeinfo(frame)          # parse some info from the caller stack frame
-        current_time_etc = "[{0:02}:{1:02}:{2:02}:{3:06}, {4}:{5:<25}:{6:<5}] ".format(t.hour, t.minute, t.second, t.microsecond,
-                                                                                       info.filename, info.function, info.lineno)
+        current_time_etc = "[{0:02}:{1:02}:{2:02}:{3:06}, " \
+                           "{4}:{5:<25}:{6:<5} tid:{7}] ".format(t.hour, t.minute, t.second, t.microsecond,
+                                                                 info.filename, info.function, info.lineno,
+                                                                 threading.currentThread().ident)
     else:
         current_time_etc = "[{0:02}:{1:02}:{2:02}:{3:06}]".format(t.hour, t.minute, t.second, t.microsecond)
 
