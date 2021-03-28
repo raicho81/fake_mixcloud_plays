@@ -4,7 +4,7 @@
   "speed": "fast",
   "wait_time_before_try_play": 3,
   "fast_wait_time": 12,
-  "random_wait_mu" : 2000,
+  "random_wait_mu" : 2800,
   "random_wait_sigma": 1000,
   "headless_chrome": true,
   "proxy_address": "",

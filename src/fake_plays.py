@@ -154,7 +154,7 @@ def wait_for(duration, cond):
         return
     if duration <= 0:
         return
-    log("Will stay Idle for {0}h {1}m {2}s ({3} second(s))".format(duration // (60 * 60), duration // 60, duration % 60, duration))
+    log("Will stay Idle for {0}h {1}m {2}s ({3} second(s))".format(duration // (60 * 60), (duration // 60) % 60, duration % 60, duration))
     with cond:
         cond.wait(duration)
 
