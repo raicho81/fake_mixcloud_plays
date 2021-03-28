@@ -1,0 +1,1 @@
+docker build --force-rm -t mixcloud_fake_plays .
