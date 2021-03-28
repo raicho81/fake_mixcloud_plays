@@ -103,7 +103,12 @@ def check_config(config):
         log("Error: invalid or missing 'speed' parameter in config must be 'fast' or 'random'")
         log("Defaulting to config['speed']=='fast'")
         config['speed'] = 'fast'
-    # Other unimplemented checks etc. Well, I was too lazy to make them all :D
+    if not ('headless_chrome' in config.keys()) or not isinstance(config['headless_chrome'], bool):
+        log("Error: invalid or missing 'headless_chrome' parameter in config must be boolean")
+        log("Defaulting to config['headless_chrome']==True")
+        config['headless_chrome'] = True
+    # Other unimplemented checks and defaults and etc. Well, I was too lazy to make them all :D
+    # This a POC anyway (I am trying to coin a decent excuse :D)
 
 
 def make_chrome_options(config):
@@ -141,9 +146,9 @@ def start_play_if_stopped(browser, config):
             log(msg)
 
 
-# Start an interruptable timed-wait instead of time.sleep, which is not interruptable.
+# Start an interruptable timed-wait on Condition (Variable) instead of time.sleep, which is not interruptable.
 # To interrupt a timed-wait we need to simply call notify_wait_cond before the duration has expired
-# I did this to implement graceful stops when an appropriate signal is received from the OS.
+# I did this to implement grace-full stops when an appropriate signal is received from the OS.
 def wait_for(duration, cond):
     if stop:
         return
@@ -206,7 +211,7 @@ def main():
     try:
         log("Trying to close Chrome")
         browser.close()
-        log("Closed Chrome. Whew :) It wasn't so hard, was it?")
+        log("Killed Chrome{} Whew :) It wasn't so hard, was it :)".format(' - The Head-Less :)' if config['headless_chrome'] else "."))
     except WebDriverException as e:
         log(e)
 

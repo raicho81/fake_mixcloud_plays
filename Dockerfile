@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:buster-slim
 
 USER root
 # Non-Interactive packages install/upgrade
@@ -12,7 +12,7 @@ COPY requirements.txt .
 
 #  Install pre-requisites
 RUN apt-get update && apt-get upgrade -y && apt-get clean
-RUN apt-get install -y curl python3 python3-dev python3-distutils gnupg wget unzip procps
+RUN apt-get install -y curl python3 python3-dev python3-distutils gnupg wget unzip procps nano
 
 # Install pip
 RUN curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \

@@ -9,5 +9,5 @@
   "headless_chrome": true,
   "proxy_address": "",
   "proxy_port": 0,
-  "debug": true
+  "debug": false
 }
