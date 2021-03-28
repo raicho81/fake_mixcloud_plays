@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 USER root
 # Non-Interactive packages install/upgrade
