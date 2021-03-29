@@ -9,6 +9,9 @@ WORKDIR /app
 COPY src/ .
 COPY config.json .
 COPY requirements.txt .
+WORKDIR /
+COPY BSD_0_CLAUSE_LICENSE_READ_ME.txt .
+WORKDIR /app
 
 #  Install pre-requisites
 RUN apt-get update && apt-get upgrade -y && apt-get clean

@@ -1,5 +1,5 @@
 {
-  "mix_url": "https://www.mixcloud.com/raychomukelov/some-minimal-tracks-picked-and-mixed-by-me-mainli-minus-but-also-memento-rukus-and-838/",
+  "mix_url": "https://www.mixcloud.com/tristarjet/club-beats-episode-458/",
   "play_button_xpath": "//div[@class = 'play-button-wrap'][span/@class ='play-button play-button-cloudcast']",
   "speed": "fast",
   "wait_time_before_try_play": 3,
