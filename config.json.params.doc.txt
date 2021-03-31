@@ -1,0 +1,11 @@
+  "mix_url": URLof the mix in Mixcloud
+  "play_button_xpath": XPath to the Play button div wrapper
+  "speed": "fast" - refresh after wait_time_before_try_play + fast_wait_time seconds, "random" - generate random play time with gauss distribution with parameters random_wait_mu (mean) and random_wait_sigma (dispersion)
+  "wait_time_before_try_play": time to wait after the page was loaded before clicking the play button if the playback wsn't started yet
+  "fast_wait_time": time to wait after starting the playback or just play time
+  "random_wait_mu" : mean for the randomly generated play time
+  "random_wait_sigma": dispersion for the randomly generated play time
+  "headless_chrome": true/false - the name tells it all
+  "proxy_list": a list of proxies in the form [[proxy_addr_1, port_1], ..., [proxy_addr_n, port_n]] if list is missing no proxy is used
+  "proxy_list_usage": "cycle" or "one_shot" - cycle infinitely the list of proxies or pass once through it then stop the script
+  "debug": false/true - when true more verbose information (file, function and line number of the caller) is displayed in the log

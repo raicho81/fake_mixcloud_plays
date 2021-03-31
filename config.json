@@ -8,6 +8,6 @@
   "random_wait_sigma": 1000,
   "headless_chrome": true,
   "proxy_list": [],
-  "proxy_list_usage": "one_shot",
+  "proxy_list_usage": "cycle",
   "debug": false
 }
