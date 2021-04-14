@@ -78,7 +78,7 @@ def install_signal_handlers():
         log("<<< Installing signal handlers END <<<")
 
 
-def make_next_proxy_pair_func(proxy_list, usage=None):
+def get_next_proxy_pair(proxy_list, usage=None):
     def wrapper(gen):
         for x in gen():
             return x
@@ -128,7 +128,7 @@ def check_config(config):
         log("Defaulting to config['headless_chrome']==True")
         config['headless_chrome'] = True
     if config['proxy_list']:  # we have present a proxy list
-        config['next_proxy_pair_func'] = make_next_proxy_pair_func(config['proxy_list'], config['proxy_list_usage'])
+        config['next_proxy_pair_func'] = get_next_proxy_pair(config['proxy_list'], config['proxy_list_usage'])
     else:
         config['next_proxy_pair_func'] = None
     # Other unimplemented checks and defaults and etc. Well, I was too lazy to make them all :D

@@ -9,6 +9,7 @@ WORKDIR /app
 COPY src/ .
 COPY config.json .
 COPY requirements.txt .
+COPY BSD_0_CLAUSE_LICENSE_READ_ME.txt .
 WORKDIR /
 COPY BSD_0_CLAUSE_LICENSE_READ_ME.txt .
 WORKDIR /app

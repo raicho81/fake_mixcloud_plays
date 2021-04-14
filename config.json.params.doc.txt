@@ -1,7 +1,7 @@
   "mix_url": URLof the mix in Mixcloud
   "play_button_xpath": XPath to the Play button div wrapper
   "speed": "fast" - refresh after wait_time_before_try_play + fast_wait_time seconds, "random" - generate random play time with gauss distribution with parameters random_wait_mu (mean) and random_wait_sigma (dispersion)
-  "wait_time_before_try_play": time to wait after the page was loaded before clicking the play button if the playback wsn't started yet
+  "wait_time_before_try_play": time to wait after the page was loaded before clicking the play button if the playback wasn't started yet
   "fast_wait_time": time to wait after starting the playback or just play time
   "random_wait_mu" : mean for the randomly generated play time
   "random_wait_sigma": dispersion for the randomly generated play time
