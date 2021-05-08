@@ -1,13 +1,13 @@
 {
-  "mix_url": "https://www.mixcloud.com/tristarjet/club-beats-episode-145-part-2-guest-mix-by-shark-kozlowski/",
+  "mix_url": "https://www.mixcloud.com/raychomukelov/raycho-mukelov-minimal-mix-04242021/",
   "play_button_xpath": "//div[@class = 'play-button-wrap'][span/@class ='play-button play-button-cloudcast']",
   "speed": "fast",
   "wait_time_before_try_play": 5,
-  "fast_wait_time": 15,
+  "fast_wait_time": 120,
   "random_wait_mu" : 2800,
   "random_wait_sigma": 1000,
   "headless_chrome": true,
   "proxy_list": [],
   "proxy_list_usage": "cycle",
-  "debug": false
+  "debug": true
 }

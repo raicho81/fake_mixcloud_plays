@@ -66,22 +66,24 @@ def signal_handler(signum, frame):
 def install_signal_handlers():
     # Install signal handler(s) to leverage grace-full stop if OS is POSIX
     os_name = os.name
-    log("os.name=={}".format(os_name))
     if os_name == "posix":
-        log(">>> Installing signal handlers START >>>")
+        if DEBUG:
+            log(">>> Installing signal handlers START >>>")
         for signal_code in handled_signals.keys():
             try:
                 signal.signal(signal_code, signal_handler)
-                log("Installed signal handler for signal {}".format(handled_signals[signal_code]))
+                if DEBUG:
+                    log("Installed signal handler for signal {}".format(handled_signals[signal_code]))
             except OSError as e:
                 log(e)
-        log("<<< Installing signal handlers END <<<")
+        if DEBUG:
+            log("<<< Installing signal handlers END <<<")
 
 
 def get_next_proxy_pair(proxy_list, usage=None):
     def wrapper(gen):
-        for x in gen():
-            return x
+        for proxy_pair in gen():
+            return proxy_pair
 
     def make_proxy_pairs_generator(proxy_list, usage=None):
         if usage == 'cycle':
@@ -90,7 +92,7 @@ def get_next_proxy_pair(proxy_list, usage=None):
             def cycle_proxy_pairs_generator():
                 for proxy_pair in cycle_proxy_gen:
                     yield proxy_pair
-                yield [None, None]
+                yield []
 
             return cycle_proxy_pairs_generator
         elif usage == 'one_shot':
@@ -101,7 +103,7 @@ def get_next_proxy_pair(proxy_list, usage=None):
                     try:
                         yield proxy_list[c]
                     except IndexError as e:
-                        yield [None, None]
+                        yield []
 
             return one_shot_proxy_pairs_generator
         else:
@@ -146,10 +148,11 @@ def load_config():
                     "'debug']==False")
             else:
                 DEBUG = config['debug']
-            log(">>> Loaded configuration START >>>")
-            for _ in config:
-                log("{0: <30}: {1}".format(_, config[_]))
-            log("<<< Loaded configuration END <<<")
+            if config['debug']:
+                log(">>> Loaded configuration START >>>")
+                for _ in config:
+                    log("{0: <30}: {1}".format(_, config[_]))
+                log("<<< Loaded configuration END <<<")
     except IOError as e:
         print(e)
     return config
@@ -165,14 +168,15 @@ def make_chrome_options(config):
         chrome_options.add_argument("--disable-dev-shm-usage")
     if config['next_proxy_pair_func'] is not None:  # There are proxys/ports lists present
         next_proxy_pair = config['next_proxy_pair_func']()
-        if next_proxy_pair != [None, None]:
+        if next_proxy_pair != []:
             chrome_options.add_argument("--proxy-server={}:{}".format(*next_proxy_pair))
         else:
             global_stop()
-    log(">>> Chrome arguments START >>>")
-    for a in chrome_options.arguments:
-        log("{}".format(a))
-    log("<<< Chrome arguments END <<<")
+    if config['debug']:
+        log(">>> Chrome arguments START >>>")
+        for a in chrome_options.arguments:
+            log("{}".format(a))
+        log("<<< Chrome arguments END <<<")
     return chrome_options
 
 
