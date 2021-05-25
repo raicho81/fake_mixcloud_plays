@@ -9,5 +9,5 @@
   "headless_chrome": true,
   "proxy_list": [],
   "proxy_list_usage": "cycle",
-  "debug": true
+  "debug": false
 }

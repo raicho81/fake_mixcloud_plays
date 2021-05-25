@@ -4,12 +4,12 @@ services:
   mixcloud_fake_plays_proxy_1:
     image: mixcloud_fake_plays
     restart: always
-    volumes: ./proxy_configs/config_proxy_1.json:/app/config.json ro
+    volumes: ./proxy_configs/config_proxy_set_1.json:/app/config.json ro
 
   mixcloud_fake_plays_proxy_2:
     image: mixcloud_fake_plays
     restart: always
-    volumes: ./proxy_configs/config_proxy_2.json:/app/config.json ro
+    volumes: ./proxy_configs/config_proxy_set_2.json:/app/config.json ro
 
 # You get the idea. To run the image N times with different proxies (and possibly with different mix_url's)
 # just create (generate) the ./proxy_configs/config_proxy_[number].json files filled with the correct proxy parameters
